@@ -7,10 +7,10 @@
 #define epsilon 1E-5
 
 //Lendo o arquivo
-void ler_Matriz(double matriz[MAX][MAX], const char *nome_arquivo) {
+void ler_matriz(double matriz[MAX][MAX], const char *nome_arquivo) {
     FILE *arquivo = fopen(nome_arquivo, "r");
     if (!arquivo) {
-        perror("Arquivo nao encontrado");
+        printf("Arquivo nao encontrado");
         exit(0);
     }
 
@@ -24,26 +24,26 @@ void ler_Matriz(double matriz[MAX][MAX], const char *nome_arquivo) {
 
 //Teste de Parada
 int teste_parada(double *lambda, double *autovalor) {
-    double erro, erro_final = 1;
-    int iter_final;
+    double erro, menor_erro = 1;
+    int i_final;
     
     //Obtendo o menor erro da iteracao
     for (int i = 0; i < MAX; i++) {
         erro = fabs(autovalor[i] - lambda[i]) / fabs(autovalor[i]);
-        if (erro < erro_final) {
-            erro_final = erro;
-            iter_final = i;
+        if (erro < menor_erro) {
+            menor_erro = erro;
+            i_final = i;
         }
     }
     
     //Comparando os erros
-    if (erro_final >= epsilon) {
+    if (menor_erro >= epsilon) {
         for (int i = 0; i < MAX; i++){
             lambda[i] = autovalor[i];   
         }
         return -1;
     }
-    return iter_final;
+    return i_final;
 }
 
 //Metodo das potencias
@@ -125,7 +125,7 @@ void elim_gauss (double R[MAX][MAX], double z[MAX], double y[MAX]) {
 }
 
 //Metodo das potencias inverso
-int metodo_potencias_inversas(double matriz[MAX][MAX], double deslocamento, double *autovalor, double *autovetor, double *y) {
+int metodo_potencias_inverso(double matriz[MAX][MAX], double deslocamento, double *autovalor, double *autovetor, double *y) {
     double A[MAX][MAX], temp [MAX];
     double z[MAX], lambda[MAX], norma;
     int iter = 0, iter_final;
@@ -175,7 +175,7 @@ int main(){
     double autovalor[MAX], autovetor[MAX], y[MAX], deslocamento[MAX];
     int iter_final, m;
     
-    ler_Matriz(R, "correlacao.txt");
+    ler_matriz(R, "correlacao.txt");
 
     //zerando a matriz D
     for(int i=0; i < MAX; i++){
@@ -223,7 +223,7 @@ int main(){
 
     //aplicando o metodo das potencias inverso com deslocamento
     for(int i=0; i < MAX-1; i++){
-        metodo_potencias_inversas(R, deslocamento[i], autovalor, autovetor, y);
+        metodo_potencias_inverso(R, deslocamento[i], autovalor, autovetor, y);
         double autovalor_nverso = (1/autovalor[iter_final])+deslocamento[i];
         printf("\n\nPelo metodo das potencias inverso com deslocamento (%.3lf), R possui: \n Autovalor: %lf\n", deslocamento[i], autovalor_inverso);
         printf("Autovetor correspondente:\n");
