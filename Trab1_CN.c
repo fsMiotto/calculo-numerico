@@ -125,7 +125,7 @@ void elim_gauss (double R[MAX][MAX], double z[MAX], double y[MAX]) {
 }
 
 //Metodo das matrizes inversas
-int metodo_potencias_inversas(double matriz[MAX][MAX], double q, double *autovalor, double *autovetor, double *y) {
+int metodo_potencias_inversas(double matriz[MAX][MAX], double deslocamento, double *autovalor, double *autovetor, double *y) {
     double A[MAX][MAX], temp [MAX];
     double z[MAX], lambda[MAX], norma;
     int iter = 0, iter_final;
@@ -137,7 +137,7 @@ int metodo_potencias_inversas(double matriz[MAX][MAX], double q, double *autoval
         for(int j=0;j<MAX;j++){
             A[i][j] = matriz[i][j];
         }
-        A[i][i]-=q;
+        A[i][i]-=deslocamento;
     }
     
     do {
@@ -173,7 +173,7 @@ int metodo_potencias_inversas(double matriz[MAX][MAX], double q, double *autoval
 int main(){
     double R[MAX][MAX];
     double autovalor[MAX], autovetor[MAX], y[MAX];
-    double q = 0;
+    double deslocamento;
     int iter_final;
     
     ler_Matriz(R, "correlacao.txt");
@@ -183,59 +183,31 @@ int main(){
         scanf("%lf", &y[i]);
     }
 
+    printf("insira o deslocamento para o metodo das potencias inverso\n");
+    scanf("%lf", &deslocamento);
+    
+
     iter_final = metodo_potencias(R, autovalor, autovetor, y);
     printf("\nPelo metodo das potencias, R possui: \nAutovalor dominante: %lf\n", autovalor[iter_final]);
     printf("\nAutovetor correspondente:\n");
     for (int i = 0; i < MAX; i++) {
         printf("%lf\n", autovetor[i]);
     }
+    
 
-    metodo_potencias_inversas(R, q, autovalor, autovetor, y);
-    printf("\n\nPelo metodo das potencias inversas, R possui: \nMenor autovalor: %lf\n", (1/autovalor[iter_final])+q);
+    metodo_potencias_inversas(R, deslocamento, autovalor, autovetor, y);
+    printf("\n\nPelo metodo das potencias inverso com deslocamento (%lf), R possui: \n Autovalor dominante: %lf\n", deslocamento, (1/autovalor[iter_final])+deslocamento);
     printf("\nAutovetor correspondente:\n");
     for (int i = 0; i < MAX; i++) {
         printf("%lf\n", autovetor[i]);
     }
-    
-    q = 2;
-    metodo_potencias_inversas(R, q, autovalor, autovetor, y);
-    printf("\n\nPelo metodo das potencias inversas com deslocamento (2), R possui: \nOutro autovalor: %lf\n", (1/autovalor[iter_final])+q);
+
+    metodo_potencias_inversas(R, deslocamento, autovalor, autovetor, y);
+    printf("\n\nPelo metodo das potencias inverso com deslocamento (%lf), R possui: \n Autovalor dominante: %lf\n", deslocamento, (1/autovalor[iter_final])+deslocamento);
     printf("\nAutovetor correspondente:\n");
     for (int i = 0; i < MAX; i++) {
         printf("%lf\n", autovetor[i]);
     }
-    
-    q = 0.6;
-    metodo_potencias_inversas(R, q, autovalor, autovetor, y);
-    printf("\n\nPelo metodo das potencias inversas com deslocamento (0.6), R possui: \nOutro autovalor: %lf\n", (1/autovalor[iter_final])+q);
-    printf("\nAutovetor correspondente:\n");
-    for (int i = 0; i < MAX; i++) {
-        printf("%lf\n", autovetor[i]);
-    }
-    
-    q = 0.4;
-    metodo_potencias_inversas(R, q, autovalor, autovetor, y);
-    printf("\n\nPelo metodo das potencias inversas com deslocamento (0.4), R possui: \nOutro autovalor: %lf\n", (1/autovalor[iter_final])+q);
-    printf("\nAutovetor correspondente:\n");
-    for (int i = 0; i < MAX; i++) {
-        printf("%lf\n", autovetor[i]);
-    }
-    
-    q = 0.3;
-    metodo_potencias_inversas(R, q, autovalor, autovetor, y);
-    printf("\n\nPelo metodo das potencias inversas com deslocamento (0.3), R possui: \nOutro autovalor: %lf\n", (1/autovalor[iter_final])+q);
-    printf("\nAutovetor correspondente:\n");
-    for (int i = 0; i < MAX; i++) {
-        printf("%lf\n", autovetor[i]);
-    }
-    
-    q = 0.2;
-    metodo_potencias_inversas(R, q, autovalor, autovetor, y);
-    printf("\n\nPelo metodo das potencias inversas com deslocamento (0.2), R possui: \nOutro autovalor: %lf\n", (1/autovalor[iter_final])+q);
-    printf("\nAutovetor correspondente:\n");
-    for (int i = 0; i < MAX; i++) {
-        printf("%lf\n", autovetor[i]);
-    }
-    
+    ///////////
     return 0;
 }
