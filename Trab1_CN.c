@@ -53,8 +53,8 @@ int metodo_potencias(double matriz[MAX][MAX], double *autovalor, double *autovet
     
     //valores iniciais
     for (int i = 0; i < MAX; i++) {
-        lambda[i] = 0.0;
-        autovetor[i] = 1.0;
+        lambda[i] = 0;
+        autovetor[i] = 1;
     }
     
     do {
@@ -124,7 +124,7 @@ void elim_gauss (double R[MAX][MAX], double z[MAX], double y[MAX]) {
     }
 }
 
-//Metodo das matrizes inversas
+//Metodo das potencias inverso
 int metodo_potencias_inversas(double matriz[MAX][MAX], double deslocamento, double *autovalor, double *autovetor, double *y) {
     double A[MAX][MAX], temp [MAX];
     double z[MAX], lambda[MAX], norma;
@@ -171,43 +171,97 @@ int metodo_potencias_inversas(double matriz[MAX][MAX], double deslocamento, doub
 
 
 int main(){
-    double R[MAX][MAX];
-    double autovalor[MAX], autovetor[MAX], y[MAX];
-    double deslocamento;
-    int iter_final;
+    double R[MAX][MAX], D[MAX][MAX], P[MAX][MAX];
+    double autovalor[MAX], autovetor[MAX], y[MAX], deslocamento[MAX];
+    int iter_final, m;
     
     ler_Matriz(R, "correlacao.txt");
 
-    printf("insira os valores do vetor inicial para o metodo das potencias (separados por espaço)\n");
+    //zerando a matriz D
+    for(int i=0; i < MAX; i++){
+        for(int j=0; j < MAX; j++){
+            printf("%lf  ", D[i][j])
+        }
+    }
+
+    // obtendo o vetor y inicial
+    printf("insira os valores do vetor inicial para o metodo das potencias (separados por espaco)\n");
     for (int i = 0; i < MAX; i++) {
         scanf("%lf", &y[i]);
     }
 
-    printf("insira o deslocamento para o metodo das potencias inverso\n");
-    scanf("%lf", &deslocamento);
-    
 
+    // aplicando o metodo das potencias
     iter_final = metodo_potencias(R, autovalor, autovetor, y);
     printf("\nPelo metodo das potencias, R possui: \nAutovalor dominante: %lf\n", autovalor[iter_final]);
-    printf("\nAutovetor correspondente:\n");
-    for (int i = 0; i < MAX; i++) {
+    printf("Autovetor correspondente:\n");
+    for (int i = 0; i < MAX; i++){
         printf("%lf\n", autovetor[i]);
     }
     
+    // MATRIZES D e P
+    for (int j=0; j < MAX; j++) {
+        // obtendo a coluna de autovetores de P
+        P[j][0] = autovetor[j];
+        // Zeros na matriz D
+        D[0][j] = 0;
+    }
+    // autovalor dominante na primeira posição da matriz d autovalores
+    D[0]D[0] = autovalor[iter_final];
 
-    metodo_potencias_inversas(R, deslocamento, autovalor, autovetor, y);
-    printf("\n\nPelo metodo das potencias inverso com deslocamento (%lf), R possui: \n Autovalor dominante: %lf\n", deslocamento, (1/autovalor[iter_final])+deslocamento);
-    printf("\nAutovetor correspondente:\n");
-    for (int i = 0; i < MAX; i++) {
-        printf("%lf\n", autovetor[i]);
+
+    
+    // obtendo os valores de deslocamento
+    printf("insira os (6) deslocamentos para o metodo das potencias em ordem decrescente (sepados por espaco)\n");
+    for (int i=0; i < MAX-1; i++){
+        scanf("%lf", &deslocamento[i]);
+        while(deslocamento[i] < 0 || deslocamento[i] > autovalor[iter_final]){
+            printf("valor invalido, digite um valor entre 0 e %lf:  ", autovalor[iter_final]);
+            scanf("%lf", &deslocamento[i]);
+        }
     }
 
-    metodo_potencias_inversas(R, deslocamento, autovalor, autovetor, y);
-    printf("\n\nPelo metodo das potencias inverso com deslocamento (%lf), R possui: \n Autovalor dominante: %lf\n", deslocamento, (1/autovalor[iter_final])+deslocamento);
-    printf("\nAutovetor correspondente:\n");
-    for (int i = 0; i < MAX; i++) {
-        printf("%lf\n", autovetor[i]);
+    //aplicando o metodo das potencias inverso com deslocamento
+    for(int i=0; i < MAX-1; i++){
+        metodo_potencias_inversas(R, deslocamento[i], autovalor, autovetor, y);
+        double autovalor_nverso = (1/autovalor[iter_final])+deslocamento[i];
+        printf("\n\nPelo metodo das potencias inverso com deslocamento (%.3lf), R possui: \n Autovalor: %lf\n", deslocamento[i], autovalor_inverso);
+        printf("Autovetor correspondente:\n");
+
+        //Matriz P e D
+        for (int j=0; j < MAX; j++) {
+            printf("%lf\n", autovetor[j]);
+            // obtendo a coluna de autovetores de P
+            P[j][i+1] = autovetor[j];
+            // Zeros na matriz D
+            D[i+1][j] = 0; 
+        }
+        // Obtendo o autovalor da diagonal de D
+        D[i+1][i+1] = autovalor_nverso;
+
+        //achando o "m" para o criterio de kaiser
+        if(autovalor_nverso > 1 ){m++;}
     }
-    ///////////
+    
+    //Prints da matris D
+    printf("Matriz D diagonal de autovalores de R:\n");
+    for(int i=0; i < MAX; i++){
+        for(int j=0; j < MAX; j++){
+            printf("%lf  ", D[i][j])
+        }
+        printf("\n");
+    }
+
+    //Prints da matris P
+    printf("\n\nMatriz P de autovetores dos autovalores de D:\n");
+    for(int i=0; i < MAX; i++){
+        for(int j=0; j < MAX; j++){
+            printf("%lf  ", P[i][j])
+        }
+        printf("\n");
+    }
+
+    printf("\n\nPelo criterio de Kiser o valor de 'm' em R é %d", m);
+
     return 0;
 }
