@@ -2,9 +2,9 @@
 #include <stdlib.h>
 #include <math.h>
 
-#define MAX 7
-#define MAX_iter 100
-#define epsilon 1e-5
+#define MAX 7 //Tamanho da matriz e vetores
+#define MAX_iter 100 //Número máximo de iterações
+#define precisao 1e-5 //
 
 //Lendo o arquivo
 void ler_matriz(double matriz[MAX][MAX], const char *nome_arquivo) {
@@ -14,7 +14,7 @@ void ler_matriz(double matriz[MAX][MAX], const char *nome_arquivo) {
     //Erro
     if (!arquivo) {
         printf("Arquivo nao encontrado");
-        exit(0);
+        exit(1); //Finaliza o programa com status de erro
     }
 
     //Lendo o arquivo
@@ -29,8 +29,8 @@ void ler_matriz(double matriz[MAX][MAX], const char *nome_arquivo) {
 }
 
 //Teste de Parada
-int teste_parada(double *autovalor_0, double *autovalor_1) {
-    double erro, menor_erro = 100;
+double teste_parada(double *autovalor_0, double *autovalor_1) {
+    double erro, menor_erro = 10;
     int i_dominante;
     
     //Obtendo o menor erro da iteracao
@@ -44,15 +44,15 @@ int teste_parada(double *autovalor_0, double *autovalor_1) {
         }
     }
     
-    //Comparando os erros
-    if (menor_erro >= epsilon) {return -1;} //continua o metodo
-    else {return i_dominante;} //para e retorna a posição do autovalor com menor erro
+    //Comparando o erro com o criterio de precisao
+    if (menor_erro >= precisao) {return -1;} //continua o metodo
+    else {return autovalor_1[i_dominante];} //para e retorna o autovalor com menor erro
 }
 
 //Eliminacao de gauss sem pivotamento
 void metodo_eliminacao_gauss (double R[MAX][MAX], double *Z, double *Y) {
     double Yaux[MAX],Raux[MAX][MAX];
-    double fator, max;
+    double x;
 
     //criando clones de Y e R para usar no metodo
     for(int i = 0; i < MAX; i++){
@@ -64,17 +64,17 @@ void metodo_eliminacao_gauss (double R[MAX][MAX], double *Z, double *Y) {
     
     //realizando as eliminacoes
     for (int i=0; i < MAX; i++) {
-        //matriz triangular superior
+        //Montando a matriz triangular superior
         for (int j = i+1; j < MAX; j++) {
-            fator = Raux[j][i] / Raux[i][i];
-            for (int k=i; k < MAX; k++) {
-                Raux[j][k] -= fator * Raux[i][k];
+            x = Raux[j][i] / Raux[i][i];
+            for (int n=i; n < MAX; n++) {
+                Raux[j][n] -= x * Raux[i][n];
             }
-            Yaux[j] -= fator * Yaux[i];
+            Yaux[j] -= x * Yaux[i];
         }
     }
 
-    // fazendo as substituicao
+    // Normalizando o vetor Z
     for(int i = MAX-1; i >= 0; i--){
         for (int j = MAX-1; j > i; j--){
             Yaux[i] -= Raux[i][j]*Z[j];
@@ -83,11 +83,12 @@ void metodo_eliminacao_gauss (double R[MAX][MAX], double *Z, double *Y) {
     }
 }
 
+
 //Metodo das potencias
-double metodo_potencias(double R[MAX][MAX], double *autovalor_1, double *autovetor, double *Y) {
-    double Z[MAX], autovalor_0[MAX], Yaux[MAX];
-    double norma;
-    int iter = 0, i_dominante;
+double metodo_potencias(double R[MAX][MAX], double *autovetor, double *Y) {
+    double Z[MAX], autovalor_0[MAX], Yaux[MAX], autovalor_1[MAX];
+    double norma, autovalor_dominante;
+    int iter = 0;
     
     //valores iniciais
     for (int i=0; i < MAX; i++) {
@@ -128,19 +129,19 @@ double metodo_potencias(double R[MAX][MAX], double *autovalor_1, double *autovet
         }
 
         //teste de parada
-        i_dominante = teste_parada(autovalor_0, autovalor_1);
+        autovalor_dominante = teste_parada(autovalor_0, autovalor_1);
         iter++;
         
-        } while ( iter < MAX_iter && i_dominante == -1);
+        } while ( iter < MAX_iter && autovalor_dominante == -1);
 
-    return autovalor_1[i_dominante]; //Retorna o autovalor dominante
+    return autovalor_dominante; //Retorna o autovalor dominante
 }
 
 //Metodo das potencias inverso
-double metodo_potencias_inverso(double R[MAX][MAX], double *autovalor_1, double *autovetor, double *Y, double deslocamento) {
-    double A[MAX][MAX], Z[MAX], autovalor_0[MAX], Yaux[MAX];
-    double norma;
-    int iter = 0, i_dominante;
+double metodo_potencias_inverso(double R[MAX][MAX], double *autovetor, double *Y, double deslocamento) {
+    double A[MAX][MAX], Z[MAX], autovalor_0[MAX], Yaux[MAX], autovalor_1[MAX];
+    double norma, autovalor_dominante;
+    int iter = 0;
     
     //valores iniciais
     for (int i=0; i < MAX; i++) {
@@ -178,13 +179,13 @@ double metodo_potencias_inverso(double R[MAX][MAX], double *autovalor_1, double 
             }
 
         //teste de padara
-        i_dominante = teste_parada(autovalor_0, autovalor_1);
+        autovalor_dominante = teste_parada(autovalor_0, autovalor_1);
         iter++;
 
-        } while ( iter < MAX_iter && i_dominante == -1);
+        } while ( iter < MAX_iter && autovalor_dominante == -1);
 
     //Retorna o autovalor dominante  
-    return (1/autovalor_1[i_dominante]) + deslocamento; 
+    return (1/autovalor_dominante) + deslocamento; 
 }
 
 
@@ -193,7 +194,7 @@ int main(){
     //Declaração de matrizes
     double R[MAX][MAX], D[MAX][MAX], P[MAX][MAX];
     //Declaração de vetores
-    double autovalor[MAX], autovetor[MAX], Y[MAX], deslocamento[MAX];
+    double autovetor[MAX], Y[MAX], deslocamento[MAX];
     //declaração de variaveis
     double autovalor_dominante;
     int m = 0;
@@ -216,7 +217,7 @@ int main(){
 
 
     // aplicando o metodo das potencias
-    autovalor_dominante = metodo_potencias(R, autovalor, autovetor, Y);
+    autovalor_dominante = metodo_potencias(R, autovetor, Y);
     printf("\nPelo metodo das potencias R possui: \nAutovalor dominante:  %lf \nAutovetor correspondente:\n", autovalor_dominante);
     //printando o autovetor
     for (int i = 0; i < MAX; i++){
@@ -239,7 +240,7 @@ int main(){
 
 
     // obtendo os valores de deslocamento
-    printf("insira os (6) deslocamentos para o metodo das potencias em ordem decrescente (sepados por espaco)\n");
+    printf("\n\ninsira os (6) deslocamentos para o metodo das potencias em ordem decrescente (sepados por espaco)\n");
     for (int i=0; i < MAX-1; i++){
         scanf("%lf", &deslocamento[i]);
         //verificando se é valido
@@ -251,7 +252,7 @@ int main(){
 
     //aplicando o metodo das potencias inverso com deslocamento
     for(int i=0; i < MAX-1; i++){
-        autovalor_dominante = metodo_potencias_inverso(R, autovalor, autovetor, Y, deslocamento[i]);
+        autovalor_dominante = metodo_potencias_inverso(R, autovetor, Y, deslocamento[i]);
         printf("\n\nPelo metodo das potencias inverso com deslocamento (%.3lf), R possui: \nAutovalor: %lf \nAutovetor correspondente:\n", deslocamento[i], autovalor_dominante);
 
         //Matriz P e D
@@ -270,7 +271,7 @@ int main(){
     }
     
     //Prints da matris D
-    printf("Matriz D diagonal de autovalores de R:\n");
+    printf("\n\nMatriz D diagonal de autovalores de R:\n");
     for(int i=0; i < MAX; i++){
         for(int j=0; j < MAX; j++){
             printf("%lf  ", D[i][j]);
