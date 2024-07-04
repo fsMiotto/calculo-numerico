@@ -267,7 +267,7 @@ int main(){
         D[i+1][i+1] = autovalor_dominante;
 
         //achando o "m" para o criterio de kaiser
-        if(autovalor_dominante > 1 ){m++;}
+        if(autovalor_dominante > 1 ){ m++; }
     }
     
     //Prints da matris D
